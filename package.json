@@ -1,5 +1,5 @@
 {
-  "name": "radiology-extract-ai",
+  "name": "radiology-report-extractor",
   "private": true,
   "version": "0.0.0",
   "type": "module",

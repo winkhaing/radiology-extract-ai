@@ -1,5 +1,6 @@
+
 {
-  "name": "Radiology Extract AI",
+  "name": "Radiology Report Extractor",
   "description": "A professional-grade radiological report information extraction assistant that processes complex free-text and provides structured, negation-aware, organ-by-organ insights.",
   "requestFramePermissions": []
 }

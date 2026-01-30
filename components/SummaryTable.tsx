@@ -16,8 +16,8 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({ reports, onReset }) 
   ).sort();
 
   const handleExportExcel = () => {
-    // CSV headers starting with Key ID
-    const headers = ['Key ID', 'Timestamp', 'Raw Report', 'Impression', ...allOrgans];
+    // Excel headers: Patient ID Key, Order ID, Timestamp, Raw Report, Impression, then organs
+    const headers = ['Patient ID Key', 'Order ID', 'Timestamp', 'Raw Report', 'Impression', ...allOrgans];
     
     const rows = reports.map(r => {
       const organData = allOrgans.map(organ => {
@@ -30,6 +30,7 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({ reports, onReset }) 
       
       return [
         `"${r.keyId.replace(/"/g, '""')}"`,
+        `"${r.orderId.replace(/"/g, '""')}"`,
         `"${r.timestamp}"`,
         `"${r.rawText.replace(/"/g, '""')}"`,
         `"${(r.extraction.impression || '').replace(/"/g, '""')}"`,
@@ -52,6 +53,19 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({ reports, onReset }) 
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Critical Data Warning */}
+      <div className="bg-red-50 border-2 border-red-200 p-5 rounded-2xl flex items-center space-x-4 shadow-sm">
+        <div className="bg-red-500 text-white p-2 rounded-full flex-shrink-0 animate-pulse">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+        </div>
+        <p className="text-red-700 font-black text-sm leading-snug">
+            Please download the final output CSV file, as this application does not save any data. 
+            All data will be lost after a new session or page refresh.
+        </p>
+      </div>
+
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Final Session Archive</h2>
@@ -78,10 +92,11 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({ reports, onReset }) 
 
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1200px]">
+          <table className="w-full text-left border-collapse min-w-[1400px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-50 z-10 border-r border-slate-200">Key ID</th>
+                <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider sticky left-0 bg-slate-50 z-10 border-r border-slate-200">Patient ID Key</th>
+                <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Order ID</th>
                 <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider min-w-[200px]">Impression</th>
                 {allOrgans.map(organ => (
                   <th key={organ} className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider min-w-[250px] border-l border-slate-200">
@@ -95,6 +110,9 @@ export const SummaryTable: React.FC<SummaryTableProps> = ({ reports, onReset }) 
                 <tr key={report.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="p-4 text-sm font-bold text-indigo-700 sticky left-0 bg-white group-hover:bg-slate-50 z-10 border-r border-slate-200">
                     {report.keyId}
+                  </td>
+                  <td className="p-4 text-sm font-medium text-slate-600 border-r border-slate-200">
+                    {report.orderId || <span className="text-slate-300 italic">N/A</span>}
                   </td>
                   <td className="p-4 text-sm text-slate-700 align-top max-w-[300px]">
                     <div className="line-clamp-4 text-xs leading-relaxed">

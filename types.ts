@@ -9,6 +9,7 @@ export interface RadiologyFinding {
 }
 
 export interface ExtractionResult {
+  is_medical_report?: boolean;
   patient_summary?: string;
   findings: RadiologyFinding[];
   impression?: string;
@@ -16,7 +17,8 @@ export interface ExtractionResult {
 
 export interface SessionReport {
   id: string;
-  keyId: string; // New variable for tracking specific reports
+  keyId: string;
+  orderId: string;
   timestamp: string;
   rawText: string;
   extraction: ExtractionResult;
@@ -26,7 +28,9 @@ export enum Status {
   IDLE = 'IDLE',
   LOADING = 'LOADING',
   SUCCESS = 'SUCCESS',
-  ERROR = 'ERROR'
+  ERROR = 'ERROR',
+  BATCH_PROCESSING = 'BATCH_PROCESSING'
 }
 
-export type AppView = 'INPUT' | 'REVIEW' | 'SUMMARY';
+export type AppView = 'LANDING' | 'INPUT' | 'REVIEW' | 'SUMMARY';
+export type ExtractionMethod = 'MANUAL' | 'UPLOAD';

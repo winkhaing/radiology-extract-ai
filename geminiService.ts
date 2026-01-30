@@ -12,15 +12,18 @@ export async function extractRadiologyData(text: string): Promise<ExtractionResu
     You are a world-class radiology information extraction assistant. 
     Your task is to parse complex, unstructured free-text radiology reports and extract structured data.
     
-    CRITICAL RULES:
+    CRITICAL VALIDATION RULE:
+    - First, determine if the provided text is a genuine radiology report (X-ray, CT, MRI, Ultrasound, etc.).
+    - If the input is non-medical, conversational, gibberish, or unrelated to radiology, you MUST set "is_medical_report" to false.
+    
+    CRITICAL EXTRACTION RULES (if it is a medical report):
     1. NEGATION AWARENESS: Distinguish between presence and absence. 
        - If the report says "No pleural effusion," then 'present' is FALSE and 'is_abnormal' is FALSE.
        - If the report says "Pleural effusion is identified," then 'present' is TRUE and 'is_abnormal' is TRUE.
-       - "Normal heart size" means 'present' is TRUE (the heart is there), but 'is_abnormal' is FALSE.
-    2. ORGAN-BY-ORGAN: Group findings by specific organs (e.g., Lungs, Heart, Liver, Gallbladder, Spleen, Bones, Vessels).
-    3. FINDING LABEL: Use concise labels like "Consolidation", "Mass", "Nodule", "Ascites", "Atherosclerosis".
-    4. ACCURACY: Read line by line. Do not hallucinate findings that aren't there.
-    5. ABNORMALITY: Any finding that indicates pathology, disease, or deviation from expected healthy state should be marked 'is_abnormal: true'.
+    2. ORGAN-BY-ORGAN: Group findings by specific organs.
+    3. FINDING LABEL: Use concise labels.
+    4. ACCURACY: Do not hallucinate.
+    5. ABNORMALITY: Mark pathology as 'is_abnormal: true'.
   `;
 
   const response = await ai.models.generateContent({
@@ -32,25 +35,26 @@ export async function extractRadiologyData(text: string): Promise<ExtractionResu
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          patient_summary: { type: Type.STRING, description: "A very brief clinical summary of the patient's state based on the report." },
-          impression: { type: Type.STRING, description: "The final diagnosis or conclusion from the report." },
+          is_medical_report: { type: Type.BOOLEAN, description: "Set to true if input is a valid radiology report, false otherwise." },
+          patient_summary: { type: Type.STRING, description: "A very brief clinical summary of the patient's state." },
+          impression: { type: Type.STRING, description: "The final diagnosis or conclusion." },
           findings: {
             type: Type.ARRAY,
             items: {
               type: Type.OBJECT,
               properties: {
-                organ: { type: Type.STRING, description: "The organ or anatomical region." },
-                finding_label: { type: Type.STRING, description: "Common medical name for the finding." },
-                finding_description: { type: Type.STRING, description: "The literal text or summarized finding from the report." },
-                present: { type: Type.BOOLEAN, description: "True if the finding (e.g. mass, fluid) exists. False if it is explicitly negated." },
-                is_abnormal: { type: Type.BOOLEAN, description: "True if this is an abnormal medical finding." },
-                details: { type: Type.STRING, description: "Extra context like location, size, or severity." }
+                organ: { type: Type.STRING },
+                finding_label: { type: Type.STRING },
+                finding_description: { type: Type.STRING },
+                present: { type: Type.BOOLEAN },
+                is_abnormal: { type: Type.BOOLEAN },
+                details: { type: Type.STRING }
               },
               required: ["organ", "finding_label", "finding_description", "present", "is_abnormal"]
             }
           }
         },
-        required: ["findings"]
+        required: ["is_medical_report", "findings"]
       }
     }
   });
